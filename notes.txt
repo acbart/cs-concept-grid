@@ -1,10 +1,34 @@
-* Draw axis
-* Showing the current word
-* Clicking on the grid puts the circle with that word, add optional comment
-* Can drag circles, click to edit
-* be able to skip a word
-* Tie in with facebook or gmail id
-* Record 
+Basic requirements:
+    * Draw axis
+    * Showing the current word
+    * Clicking on the grid puts the circle with that word, add optional comment
+    * Can drag circles, click to edit
+    * be able to skip a word
+    * Tie in with facebook or gmail id
+    * Show heatmap of average answers
+    * Server functionality:
+        - log point added
+        - log comment
+        - user login
+        - log skips
+        
+Tables:
+    Concepts
+        word
+        description
+    Users
+        id
+        description
+    Pins
+        concept
+        user
+        difficulty
+        usefulness
+        comment
+        when
+    logins
+        when
+        user
 
-* Show heatmap of average answers
-* Server: python
+Stretch Goals
+    Zooming/panning
