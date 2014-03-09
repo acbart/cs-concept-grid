@@ -1,9 +1,11 @@
 concepts = {}
-function encodeConcept(concept) {
-    return concept.replace(" ", "_");
-}
-function decodeConcept(concept) {
-    return concept.replace("_", " ");
+concept_ids = {}
+
+function unsetConcept(id) {
+    name = concept_ids[id];
+    delete concepts[name];
+    delete concept_ids[id];
+    $("#concept-" + id).remove();
 }
 
 function resizeCSGrid() {
@@ -24,8 +26,32 @@ function getBoundingBox(obj) {
             "height" : $(obj).height()};
 }
 
-function createNewDraggableConcept(name) {
-    concept = $("<span id='concept-"+encodeConcept(name)+"' concept-name='"+name+"' class='concept'>"+name+"</span>");
+function buildConceptDialog() {
+    $("#concept-dialog").dialog({
+        autoOpen: false,
+        title: "Unknown",
+        buttons: [
+            {text : "Delete", click: function() {
+                id =  $("#concept-dialog").attr("concept-id");
+                unsetConcept(id);
+                $(this).dialog("close");
+            }},
+            {text : "Okay", click: function() {
+                $(this).dialog("close");
+            }}
+        ]
+    });
+}
+
+function createNewDraggableConcept(name, id, comment) {
+    concept_ids[id] = name;
+    concept = $("<span id='concept-"+id+"' class='concept'>"+name+"</span>");
+    concept.dblclick(function() {
+        $("#concept-dialog").dialog("option", "title", name);
+        $("#concept-dialog textarea").val(comment);
+        $("#concept-dialog").attr("concept-id", id);
+        $("#concept-dialog").dialog("open");
+    });
     concept.draggable({
         distance: 10,
         scroll: false,
@@ -58,18 +84,19 @@ function createNewDraggableConcept(name) {
             self = getBoundingBox(this);
             concepts[name] = {"x": (self.x - origin.x + self.width/2) / origin.width,
                               "y": (self.y - origin.y + self.height/2) / origin.height,
-                              "ref": "#concept-"+encodeConcept(name)};
-            console.log(concepts[name])
+                              "ref": "#concept-"+id,
+                              "name": name,
+                              "id": id};
         }});
-    $("#new-concepts").append(concept);
+    $("#concepts").append(concept);
 }
 
 $(document).ready(function() {
     window.onresize = resizeCSGrid;
     resizeCSGrid();
-    createNewDraggableConcept("Closures");
-    $(".cs-grid").click(function (event) {
-        console.log(event.offsetX);
-        console.log(event.offsetY);
-    });
+    buildConceptDialog();
+    createNewDraggableConcept("Closures", 1);
+    createNewDraggableConcept("Pointers", 100);
+    createNewDraggableConcept("Reading from a file", 77);
+    createNewDraggableConcept("Local variables vs. global variables", 870);
 });

@@ -4,6 +4,14 @@
     border: 1px solid gray;
 }
 
+.concept {
+    position: absolute;
+    display: inline-block;
+    clear: left;
+    float: left;
+    border: 1px solid black;
+}
+
 .vertical-axis {
     width: 2px;
     height: 90%;
