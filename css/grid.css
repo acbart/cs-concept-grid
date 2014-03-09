@@ -1,0 +1,57 @@
+.cs-grid {
+    width: 100%;
+    height: 100%;
+    border: 1px solid gray;
+}
+
+.vertical-axis {
+    width: 2px;
+    height: 90%;
+    background-color: black;
+    position: absolute;
+    left: 50%;
+    top: 5%;
+}
+
+.horizontal-axis {
+    width: 90%;
+    height: 2px;
+    background-color: black;
+    position: absolute;
+    left: 5%;
+    top: 50%;
+}
+
+.arrow {
+    width: 0px;
+    height: 0px;
+    position: absolute;
+}
+
+.axis-up {
+	border-left: 10px solid transparent;
+	border-right: 10px solid transparent;
+	border-bottom: 10px solid black;
+    left: 50%;  top: 5%; margin-left: -9px; margin-top: -10px;
+}
+
+.axis-down { 
+	border-left: 10px solid transparent;
+	border-right: 10px solid transparent;
+	border-top: 10px solid black;
+    left: 50%;  top: 95%; margin-left: -9px; margin-top: -10px;
+}
+
+.axis-right {
+	border-top: 10px solid transparent;
+	border-bottom: 10px solid transparent;
+	border-left: 10px solid black;
+    left: 95%;  top: 50%; margin-left: -9px; margin-top: -10px;
+}
+
+.axis-left {
+	border-top: 11px solid transparent;
+	border-bottom: 11px solid transparent; 
+	border-right:11px solid black; 
+    left: 5%;  top: 50%; margin-left: -10px; margin-top: -10px;
+}
