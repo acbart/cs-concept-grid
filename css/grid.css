@@ -4,12 +4,21 @@
     border: 1px solid gray;
 }
 
+#concept-dialog  textarea{
+    width: 100%;
+}
+
+.noTitleStuff .ui-dialog-titlebar{
+    display:none;
+}
+
 .concept {
     position: absolute;
     display: inline-block;
     clear: left;
     float: left;
     border: 1px solid black;
+    white-space:nowrap;
 }
 
 .vertical-axis {
