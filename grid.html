@@ -17,6 +17,58 @@
 <body>
     <div class="content container-fluid">
         <div class="row">
+            <div class="col-md-4" id='dashboard'>
+                <div>
+                <nav class="navbar navbar-default" role="navigation">
+                  <div class="container-fluid">
+                    <!-- Brand and toggle get grouped for better mobile display -->
+                    <div class="navbar-header">
+                      <a class="navbar-brand" href="#">About</a>
+                      <a class="navbar-brand" href="#">Results</a>
+                      <a class="navbar-brand" href="#">Log out</a>
+                    </div>
+                  </div>
+                </nav>
+                
+                <div>
+                    <strong>Current Level:</strong> Beginner
+                    <div class="progress">
+                      <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 50%;">
+                        <span>60% Complete</span>
+                      </div>
+                    </div>
+                </div>
+                
+                <div style='height:100%'>
+                    <h1>Current Concepts</h1>
+                    <div id="concepts">
+                    <div class='hidden-list' style='visibility:hidden;'>
+                    </div>
+                    </div>
+                    <h1>Completed Concepts</h1>
+                    <ul id='completed-concepts' style="overflow:auto;">
+                        <li><span class="badge" style='background-color:rgb(0,64,128)' concept-id='5'>Closures</span></li>
+                        <li><span class="badge" style='background-color:rgb(0,64,128)' concept-id='5'>Closures</span></li>
+                        <li><span class="badge" style='background-color:rgb(0,64,128)' concept-id='5'>Closures</span></li>
+                        <li><span class="badge" style='background-color:rgb(0,64,128)' concept-id='5'>Closures</span></li>
+                        <li><span class="badge" style='background-color:rgb(0,64,128)' concept-id='5'>Closures</span></li>
+                        <li><span class="badge" style='background-color:rgb(0,64,128)' concept-id='5'>Closures</span></li>
+                        <li><span class="badge" style='background-color:rgb(0,64,128)' concept-id='5'>Closures</span></li>
+                        <li><span class="badge" style='background-color:rgb(0,64,128)' concept-id='5'>Closures</span></li>
+                        <li><span class="badge" style='background-color:rgb(0,64,128)' concept-id='5'>Closures</span></li>
+                        <li><span class="badge" style='background-color:rgb(0,64,128)' concept-id='5'>Closures</span></li>
+                        <li><span class="badge" style='background-color:rgb(0,64,128)' concept-id='5'>Closures</span></li>
+                        <li><span class="badge" style='background-color:rgb(0,64,128)' concept-id='5'>Closures</span></li>
+                        <li><span class="badge" style='background-color:rgb(0,64,128)' concept-id='5'>Closures</span></li>
+                        <li><span class="badge" style='background-color:rgb(0,64,128)' concept-id='5'>Closures</span></li>
+                        <li><span class="badge" style='background-color:rgb(0,64,128)' concept-id='5'>Closures</span></li>
+                        <li><span class="badge" style='background-color:rgb(0,64,128)' concept-id='5'>Closures</span></li>
+                        <li><span class="badge" style='background-color:rgb(0,64,128)' concept-id='5'>Closures</span></li>
+                    </ul>
+                </div>
+                
+                </div>
+            </div>
             <div class="col-md-8">
                 <div class="cs-grid">
                     <div class="vertical-axis"></div>
@@ -32,13 +84,6 @@
                 </div>
                 <div id="concept-dialog">
                     <textarea rows='4'></textarea>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div>
-                <h1>Current Concepts</h1>
-                <div id="concepts">
-                </div>
                 </div>
             </div>
         </div>

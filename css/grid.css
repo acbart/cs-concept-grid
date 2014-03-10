@@ -13,6 +13,7 @@
 }
 
 .concept {
+    cursor:move;
     position: absolute;
     display: inline-block;
     clear: left;
