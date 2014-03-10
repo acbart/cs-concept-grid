@@ -59,7 +59,9 @@ function buildConceptDialog() {
                 $(this).dialog("close");
             }},
             {text : "Cancel", click: function() {
+                id =  $("#concept-dialog").attr("concept-id");
                 $(this).dialog("close");
+                $("#concept-"+id).css({"font-weight": "normal"});
             }},
             {text : "Okay", click: function() {
                 id =  $("#concept-dialog").attr("concept-id");
@@ -72,10 +74,27 @@ function buildConceptDialog() {
                     $(concepts[name].ref).css({"font-style" : "normal"});
                 }
                 $("#completed-concepts li[concept-id="+id+"] span").last().text(comment);
+                $("#concept-"+id).css({"font-weight": "normal"});
                 $(this).dialog("close");
             }}
         ]
     });
+}
+
+function openConceptEditor(name, id) {
+    if (concepts[name].dropped) {
+        $("#concept-dialog").dialog("option", "title", name);
+        $("#concept-dialog").dialog("option", "position", {
+            "my" : "right-10% bottom-10%",
+            "of": "horizontal",
+            "collision": "flip",
+            "of" : concepts[name].ref
+        });
+        $("#concept-dialog textarea").val(concepts[name].comment);
+        $("#concept-dialog").attr("concept-id", id);
+        $("#concept-dialog").dialog("open");
+        $(this).css({"font-weight": "bold"});
+    }
 }
 
 function createNewDraggableConcept(name, id, comment) {
@@ -136,24 +155,19 @@ function createNewDraggableConcept(name, id, comment) {
             if (concepts[name].dropped) {
                 $("#completed-concepts li[concept-id="+id+"] span").first().css({"background-color" : "rgb("+red+","+blue+",128)"});
             } else {
-                $("#completed-concepts").append("<li concept-id='"+id+"'><span class='badge' style='background-color:rgb("+red+","+blue+",128)'>"+name+"</span><span>"+comment+"</span></li>");
+                completed_concept = $("<li concept-id='"+id+"'><span class='badge' style='background-color:rgb("+red+","+blue+",128)'>"+name+"</span><span>"+comment+"</span></li>");
+                completed_concept.click(function() {
+                    $("#concept-"+id).css({"font-weight": "bold"});
+                    openConceptEditor(name, id);
+                });
+                $("#completed-concepts").append(completed_concept);
             }
             concepts[name].dropped = true;
             layoutCurrentConcepts();
         }});
     concept.click(function() {
-        if (concepts[name].dropped) {
-            $("#concept-dialog").dialog("option", "title", name);
-            $("#concept-dialog").dialog("option", "position", {
-                "my" : "right-10% bottom-10%",
-                "of": "horizontal",
-                "collision": "flip",
-                "of" : concepts[name].ref
-            });
-            $("#concept-dialog textarea").val(concepts[name].comment);
-            $("#concept-dialog").attr("concept-id", id);
-            $("#concept-dialog").dialog("open");
-        }
+        $("#concept-"+id).css({"font-weight": "bold"});
+        openConceptEditor(name, id);
     });
     function sleep(ms) {
       var start = new Date().getTime(), expire = start + ms;

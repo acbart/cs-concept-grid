@@ -8,6 +8,10 @@
     width: 100%;
 }
 
+#completed-concepts span {
+    cursor: pointer;
+}
+
 .noTitleStuff .ui-dialog-titlebar{
     display:none;
 }
