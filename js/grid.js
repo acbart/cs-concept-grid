@@ -83,6 +83,10 @@ function buildConceptDialog() {
 
 function openConceptEditor(name, id) {
     if (concepts[name].dropped) {
+        if ($("#concept-dialog").dialog("isOpen")) {
+            $("#concept-"+$("#concept-dialog").attr("concept-id")).css({"font-weight": "normal"});
+        }
+        $("#concept-"+id).css({"font-weight": "bold"});
         $("#concept-dialog").dialog("option", "title", name);
         $("#concept-dialog").dialog("option", "position", {
             "my" : "right-10% bottom-10%",
@@ -157,7 +161,6 @@ function createNewDraggableConcept(name, id, comment) {
             } else {
                 completed_concept = $("<li concept-id='"+id+"'><span class='badge' style='background-color:rgb("+red+","+blue+",128)'>"+name+"</span><span>"+comment+"</span></li>");
                 completed_concept.click(function() {
-                    $("#concept-"+id).css({"font-weight": "bold"});
                     openConceptEditor(name, id);
                 });
                 $("#completed-concepts").append(completed_concept);
@@ -166,7 +169,6 @@ function createNewDraggableConcept(name, id, comment) {
             layoutCurrentConcepts();
         }});
     concept.click(function() {
-        $("#concept-"+id).css({"font-weight": "bold"});
         openConceptEditor(name, id);
     });
     function sleep(ms) {
