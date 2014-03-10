@@ -1,6 +1,13 @@
 concepts = {}
 concept_ids = {}
 
+function getNewConcepts(user) {
+}
+function getCompletedConcepts(user) {
+}
+function setConcept(user, id, x, y, comment) {
+}
+
 function unsetConcept(id) {
     name = concept_ids[id];
     delete concepts[name];
@@ -9,7 +16,7 @@ function unsetConcept(id) {
 
 function resizeCSGrid() {
     $(".cs-grid").height($(window).height());
-    $("#dashboard").height($(window).height());
+    $("#dashboard-bottom").height($(window).height()-$("#dashboard-top").height());
     origin = getBoundingBox(".cs-grid");
     for (concept in concepts) {
         if (concepts[concept].dropped) {
@@ -33,6 +40,7 @@ function layoutCurrentConcepts() {
         id = $(this).attr("concept-id");
         $("#concept-"+id).offset($("#concept-padding-"+id).offset());
     });
+    $("#dashboard-bottom").height($(window).height()-$("#dashboard-top").height());
 }
 
 function buildConceptDialog() {
@@ -86,7 +94,7 @@ function createNewDraggableConcept(name, id, comment) {
         distance: 10,
         scroll: false,
         start: function() {
-            
+            $("#concept-dialog").dialog("close");
         },
         drag: function() {
             $(this).css({"font-weight": "bold"});
@@ -122,7 +130,7 @@ function createNewDraggableConcept(name, id, comment) {
             $("#concept-padding-" +id).remove();
             layoutCurrentConcepts();
         }});
-    concept.dblclick(function() {
+    concept.click(function() {
         if (concepts[name].dropped) {
             $("#concept-dialog").dialog("option", "title", name);
             $("#concept-dialog").dialog("option", "position", {
