@@ -64,12 +64,14 @@ function buildConceptDialog() {
             {text : "Okay", click: function() {
                 id =  $("#concept-dialog").attr("concept-id");
                 name = concept_ids[id];
-                concepts[name].comment = $("#concept-dialog textarea").val();
+                comment =  $("#concept-dialog textarea").val();
+                concepts[name].comment = comment;
                 if (concepts[name].comment != "") {
                     $(concepts[name].ref).css({"font-style" : "italic"});
                 } else {
                     $(concepts[name].ref).css({"font-style" : "normal"});
                 }
+                $("#completed-concepts li[concept-id="+id+"] span").last().text(comment);
                 $(this).dialog("close");
             }}
         ]
@@ -124,10 +126,19 @@ function createNewDraggableConcept(name, id, comment) {
                 $(this).offset({"top": newY, "left": newX});
             }
             self = getBoundingBox(this);
-            concepts[name].x = (self.x - origin.x + self.width/2) / origin.width;
-            concepts[name].y = (self.y - origin.y + self.height/2) / origin.height;
-            concepts[name].dropped = true;
+            x = (self.x - origin.x + self.width/2) / origin.width;
+            y = (self.y - origin.y + self.height/2) / origin.height;
+            concepts[name].x = x;
+            concepts[name].y = y;
             $("#concept-padding-" +id).remove();
+            red = Math.floor(x * 200);
+            blue = Math.floor(y * 200);
+            if (concepts[name].dropped) {
+                $("#completed-concepts li[concept-id="+id+"] span").first().css({"background-color" : "rgb("+red+","+blue+",128)"});
+            } else {
+                $("#completed-concepts").append("<li concept-id='"+id+"'><span class='badge' style='background-color:rgb("+red+","+blue+",128)'>"+name+"</span><span>"+comment+"</span></li>");
+            }
+            concepts[name].dropped = true;
             layoutCurrentConcepts();
         }});
     concept.click(function() {
