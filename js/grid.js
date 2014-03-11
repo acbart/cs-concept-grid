@@ -303,7 +303,7 @@ function makeConceptAvailable(concept) {
                 moveConcept(concept.id, available_concepts, completed_concepts);
                 completed_concept = $("<li concept-id='"+concept.id+"'><span class='badge'>"+concept.name+"</span><span>"+concept.comment+"</span></li>");
                 completed_concept.click(function() {
-                    showConcept(id);
+                    showConcept(concept.id);
                     openConceptEditor(concept);
                 });
                 $(concept.ref).click(function() {
@@ -315,7 +315,7 @@ function makeConceptAvailable(concept) {
             red = Math.floor(concept.x * 200);
             blue = Math.floor(concept.y * 200);
             $("#completed-concepts li[concept-id="+concept.id+"] span").first().css({"background-color" : "rgb("+red+","+blue+",128)"});
-            showConcept(id);
+            showConcept(concept.id);
             layoutAvailableConcepts();            
             fillAvailableConcepts();
         }});
