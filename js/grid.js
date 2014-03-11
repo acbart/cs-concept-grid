@@ -209,7 +209,7 @@ function buildConceptDialog() {
                 updateConceptComment(concept, new_comment);
                 // Update View
                 if (concept.comment != "") {
-                    unitalicizeConcept(id);
+                    italicizeConcept(id);
                 } else {
                     unitalicizeConcept(id);
                 }
@@ -285,7 +285,7 @@ function makeConceptAvailable(concept) {
     expandUnseenConcept(concept);
     moveConcept(concept.id, unseen_concepts, available_concepts);
     // Add this concept to the hidden list used for spacing
-    $("#concepts .hidden-list").append("<div id='concept-padding-"+concept.id+"' concept-id='"+concept.id+"'>"+concept.name+"</div>");
+    $("#concepts .hidden-list").append("<div id='concept-padding-"+concept.id+"' class='concept-padding' concept-id='"+concept.id+"'>"+concept.name+"</div>");
     // Create the visible concept that will be absolutely positioned
     $("#concepts").append("<span id='concept-"+concept.id+"' class='concept' concept-id='"+concept.id+"'>"+concept.name+"</span>");
     if (concept.comment != "") {
