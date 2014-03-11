@@ -1,9 +1,26 @@
-available_concepts = {};
-concept_ids = {};
-visible_concepts = [];
-MAX_VISIBLE_CONCEPTS = 10;
+/**
+Concepts are either unseen, available, or completed.
+If they are completed, they can also be visible; available concepts are always
+visible. The MAX_VISIBLE_CONCEPTS are always shown.
+Only MAX_AVAILABLE_CONCEPTS are available at any given time.
+
+A concept has:
+    id: integer
+    name: string
+    comment: string
+    x: float
+    y: float
+    ref: string (Jquery path to the concept on the Grid or in the Available list)
+    state: string (either "unseen", "available", "completed")
+**/
+
+MAX_VISIBLE_CONCEPTS = 7;
 MAX_AVAILABLE_CONCEPTS = 5;
-all_concepts = [
+user = "acbart";
+available_concepts = [];
+visible_concepts = [];
+completed_concepts = [];
+unseen_concepts = [
     {id : 0, name: "Closures", comment: ""},
     {id : 1, name: "Pointers", comment: ""},
     {id : 2, name: "Package importing", comment: ""},
@@ -24,6 +41,39 @@ all_concepts = [
     {id : 17, name: "Parsing JSON in C++", comment: ""},
     {id : 18, name: "Pointers vs. References", comment: ""},
     ];
+$.each(unseen_concepts, function(index, concept) {
+    concept.state = "unseen";
+});
+
+function lookupConcept(list, id) {
+    for (i = 0; i < list.length; i += 1) {
+        if (list[i].id == id) {
+            return list[i];
+        }
+    }
+    return null;
+}
+
+function removeConcept(list, id) {
+    for (i = 0; i < list.length; i += 1) {
+        if (list[i].id == id) {
+            list.splice(i, 1);
+            break;
+        }
+    }
+}
+
+function moveConcept(id, from, to) {
+    for (i = 0; i < from.length; i += 1) {
+        if (from[i].id == id) {
+            concept = from[i];
+            from.splice(i, 1);
+            break;
+        }
+    }
+    to.push(concept);
+    return concept;
+}
 
 function getNewConcepts(user) {
 }
@@ -31,32 +81,59 @@ function getCompletedConcepts(user) {
 }
 function setConcept(user, id, x, y, comment) {
 }
-
-// Remove the concept from the Grid, adding it back to the available list.
-function unsetConcept(id) {
-    name = concept_ids[id];
-    delete available_concepts[name];
-    $("#concept-" + id).remove();
-    // Fire off notification to the server
-    all_concepts.push({name: name, id: id, comment: ""});
+function updateConceptOnServer(user, concept) {
+}
+function unsetConceptOnServer(user, id) {
 }
 
-function resizeCSGrid() {
-    // Resize the grid and dashboard to the height of the window
-    $(".cs-grid").height($(window).height());
-    $("#dashboard-bottom").height($(window).height()-$("#dashboard-top").height());
-    // Move each dropped concept to a rescaled position
-    origin = getBoundingBox(".cs-grid");
-    for (concept in available_concepts) {
-        if (available_concepts[concept].dropped) {
-            ref = available_concepts[concept].ref;
-            self = getBoundingBox(ref);
-            $(ref).offset({"left": origin.x + available_concepts[concept].x * origin.width - self.width/2,
-                           "top": origin.y + available_concepts[concept].y * origin.height - self.height/2});
+// Attempt to add new concepts from the All list to the Available list
+function fillAvailableConcepts() {
+    while (available_concepts.length < MAX_AVAILABLE_CONCEPTS) {
+        if (unseen_concepts.length > 0) {
+            makeConceptAvailable(unseen_concepts[0]);
+        } else {
+            break;
         }
+    }
+    // We're all out of concepts; way to go!
+    if (unseen_concepts.length == 0 && available_concepts.length == 0) {
     }
 }
 
+// Remove the concept from the Grid, adding it back to the available list.
+function unsetConcept(id) {
+    // Update model
+    concept = moveConcept(id, available_concepts, unseen_concepts);
+    concept.comment = "";
+    concept.state = "unseen";
+    unsetConceptOnServer(user, id);
+    // Update view
+    $("#concept-" + id).remove();
+    fillAvailableConcepts();
+}
+
+// Convert the internal coordinates on the grid to the ones used by the browser
+function internalCoordinatesToGrid(concept, grid) {
+    self = getBoundingBox(concept.ref);
+    return {"left": grid.x + concept.x * grid.width - self.width/2,
+            "top": grid.y + concept.y * grid.height - self.height/2}
+}
+
+// Fired when the window is resized, to ensure the View is correct
+function resizeCSGrid() {
+    // Resize the grid to the height of the window
+    $(".cs-grid").height($(window).height());
+    // Resize the dashboard's completed concepts to part of the window height
+    $("#dashboard-bottom").height($(window).height()-$("#dashboard-top").height());
+    // Move each dropped concept to a rescaled position
+    grid = getBoundingBox(".cs-grid");
+    for (i = 0; i < completed_concepts.length; i++) {
+        concept = completed_concepts[i];
+        $(concept.ref).offset(internalCoordinatesToGrid(concept, grid));
+    }
+}
+
+// Returns a more manageable dictionary of an object's offset (x,y,width,height)
 function getBoundingBox(obj) {
     return {"x" : $(obj).offset().left,
             "y" : $(obj).offset().top,
@@ -64,7 +141,10 @@ function getBoundingBox(obj) {
             "height" : $(obj).height()};
 }
 
-function layoutCurrentConcepts() {
+// Matches up every available concept with the underlying hidden representation
+// of it. This is done because concepts are absolutely positioned, and that's
+// bloody hard to layout manually. So we make the browser do the work :D
+function layoutAvailableConcepts() {
     $("#concepts .hidden-list div").each(function () {
         id = $(this).attr("concept-id");
         $("#concept-"+id).offset($("#concept-padding-"+id).offset());
@@ -72,65 +152,81 @@ function layoutCurrentConcepts() {
     $("#dashboard-bottom").height($(window).height()-$("#dashboard-top").height());
 }
 
+function boldConcept(id) {
+    $("#concept-"+id).css({"font-weight": "bold"});
+}
+function unboldConcept(id) {
+    $("#concept-"+id).css({"font-weight": "normal"});
+}
+function italicizeConcept(id) {
+    $("#concept-"+id).css({"font-style" : "italic"});
+}
+function unitalicizeConcept(id) {
+    $("#concept-"+id).css({"font-style" : "normal"});
+}
+function updateConceptComment(concept, new_comment) {
+    concept.comment = new_comment;
+    $("#completed-concepts li[concept-id="+concept.id+"] span").last().text(new_comment);
+    updateConceptOnServer(user, concept);
+}
+
+// Create the pop-up dialog for concepts when they're pressed
 function buildConceptDialog() {
-    $('#concept-dialog-delete').button();
     $("#concept-dialog").dialog({
         autoOpen: false,
         title: "Unknown",
         dialogClass: 'noTitleStuff',
         buttons: [
-            {text : "Delete", 
-             priority: 'secondary', 
-             "class": "btn btn-danger", 
-             click: function() {
+            {text : "Delete",  priority: 'secondary',  "class": "btn btn-danger", click: function() {
                 id =  $("#concept-dialog").attr("concept-id");
                 unsetConcept(id);
                 $(this).dialog("close");
             }},
             {text : "Cancel", click: function() {
                 id =  $("#concept-dialog").attr("concept-id");
+                unboldConcept(id);
                 $(this).dialog("close");
-                $("#concept-"+id).css({"font-weight": "normal"});
             }},
             {text : "Okay", click: function() {
                 id =  $("#concept-dialog").attr("concept-id");
-                name = concept_ids[id];
-                comment =  $("#concept-dialog textarea").val();
-                available_concepts[name].comment = comment;
-                if (available_concepts[name].comment != "") {
-                    $(available_concepts[name].ref).css({"font-style" : "italic"});
+                concept = lookupConcept(completed_concepts, id);
+                new_comment =  $("#concept-dialog textarea").val();
+                // Update model
+                updateConceptComment(concept, new_comment);
+                // Update View
+                if (concept.comment != "") {
+                    unitalicizeConcept(id);
                 } else {
-                    $(available_concepts[name].ref).css({"font-style" : "normal"});
+                    unitalicizeConcept(id);
                 }
-                $("#completed-concepts li[concept-id="+id+"] span").last().text(comment);
-                $("#concept-"+id).css({"font-weight": "normal"});
+                unboldConcept(id);
                 $(this).dialog("close");
             }}
         ]
     });
 }
 
-function openConceptEditor(name, id) {
-    if (available_concepts[name].dropped) {
-        if ($("#concept-dialog").dialog("isOpen")) {
-            $("#concept-"+$("#concept-dialog").attr("concept-id")).css({"font-weight": "normal"});
-        }
-        $("#concept-"+id).css({"font-weight": "bold"});
-        $("#concept-dialog").dialog("option", "title", name);
-        $("#concept-dialog").dialog("option", "position", {
-            "my" : "right-10% bottom-10%",
-            "of": "horizontal",
-            "collision": "flip",
-            "of" : available_concepts[name].ref
-        });
-        $("#concept-dialog textarea").val(available_concepts[name].comment);
-        $("#concept-dialog").attr("concept-id", id);
-        $("#concept-dialog").dialog("open");
-        $(this).css({"font-weight": "bold"});
+// Open up the Concept Editor with the current concept
+function openConceptEditor(concept) {
+    if ($("#concept-dialog").dialog("isOpen")) {
+        dialog_id = $("#concept-dialog").attr("concept-id");
+        unboldConcept(dialog_id);
     }
+    boldConcept(concept.id);
+    $("#concept-dialog").dialog("option", "title", concept.name);
+    $("#concept-dialog").dialog("option", "position", {
+        "my" : "right-10% bottom-10%",
+        "of": "horizontal",
+        "collision": "flip",
+        "of" : concept.ref
+    });
+    $("#concept-dialog textarea").val(concept.comment);
+    $("#concept-dialog").attr("concept-id", concept.id);
+    $("#concept-dialog").dialog("open");
 }
 
-function dropConcept(id) {
+// If the concept is hidden, then show it.
+function showConcept(id) {
     if (-1 == $.inArray(id, visible_concepts)) {
         $("#concept-"+id).show();
         visible_concepts.push(id);
@@ -141,90 +237,95 @@ function dropConcept(id) {
     }
 }
 
-function createNewDraggableConcept(name, id, comment) {
-    concept_ids[id] = name;
-    available_concepts[name] = {"ref": "#concept-"+id,
-                      "x": 0,
-                      "y": 0,
-                      "set": false,
-                      "name": name,
-                      "id": id,
-                      "comment": comment};
-    $("#concepts .hidden-list").append("<div id='concept-padding-"+id+"' concept-id='"+id+"'>"+name+"</div>");
-    concept = $("<span id='concept-"+id+"' class='concept' concept-id='"+id+"'>"+name+"</span>");
-    if (comment != "") {
-        concept.css({"font-style" : "italic"});
+// Add the default information to the concept that might be missing
+function expandUnseenConcept(concept) {
+    concept.x = 0;
+    concept.y = 0;
+    concept.ref = "#concept-"+concept.id;
+    concept.state = "available";
+}
+
+function forceWithinGrid(origin, self) {
+    result = {}
+    result.x = self.x;
+    result.y = self.y;
+    x = (self.x - origin.x);
+    y = (self.y - origin.y);
+    if (x < 0) {
+        result.x = origin.x;
     }
-    concept.draggable({
+    if (y < 0) {
+        result.y = origin.y;
+    }
+    if (x > origin.width - self.width) {
+        result.x = origin.x + origin.width - self.width;
+    }
+    if (y > origin.height - self.height) {
+        result.y = origin.y + origin.height - self.height;
+    }
+    result.changed = (y != result.y) || (x != result.x);
+    return result;
+}
+
+function makeConceptAvailable(concept) {
+    expandUnseenConcept(concept);
+    moveConcept(concept.id, unseen_concepts, available_concepts);
+    // Add this concept to the hidden list used for spacing
+    $("#concepts .hidden-list").append("<div id='concept-padding-"+concept.id+"' concept-id='"+concept.id+"'>"+concept.name+"</div>");
+    // Create the visible concept that will be absolutely positioned
+    $("#concepts").append("<span id='concept-"+concept.id+"' class='concept' concept-id='"+concept.id+"'>"+concept.name+"</span>");
+    if (concept.comment != "") {
+        italicizeConcept(concept.id);
+    }
+    $(concept.ref).draggable({
         distance: 10,
         scroll: false,
         start: function() {
             $("#concept-dialog").dialog("close");
         },
         drag: function() {
-            $(this).css({"font-weight": "bold"});
+            boldConcept(concept.id);
         },
         stop: function() {
-            $(this).css({"font-weight": "normal"});
-            self = getBoundingBox(this);
+            unboldConcept(concept.id);
             origin = getBoundingBox(".cs-grid");
-            newX = self.x;
-            newY = self.y;
-            x = (self.x - origin.x);
-            y = (self.y - origin.y);
-            if (x < 0) {
-                newX = origin.x;
-            }
-            if (y < 0) {
-                newY = origin.y;
-            }
-            if (x > origin.width - self.width) {
-                newX = origin.x + origin.width - self.width;
-            }
-            if (y > origin.height - self.height) {
-                newY = origin.y + origin.height - self.height;
-            }
-            if (newX != x || newY != y) {
-                $(available_concepts[name].ref).appendTo(".cs-grid");
-                $(this).offset({"top": newY, "left": newX});
-            }
             self = getBoundingBox(this);
-            x = (self.x - origin.x + self.width/2) / origin.width;
-            y = (self.y - origin.y + self.height/2) / origin.height;
-            available_concepts[name].x = x;
-            available_concepts[name].y = y;
-            $("#concept-padding-" +id).remove();
-            red = Math.floor(x * 200);
-            blue = Math.floor(y * 200);
-            if (available_concepts[name].dropped) {
-                $("#completed-concepts li[concept-id="+id+"] span").first().css({"background-color" : "rgb("+red+","+blue+",128)"});
-            } else {
-                completed_concept = $("<li concept-id='"+id+"'><span class='badge' style='background-color:rgb("+red+","+blue+",128)'>"+name+"</span><span>"+comment+"</span></li>");
+            snapped = forceWithinGrid(origin, self);
+            if (snapped.changed) {
+                $(concept.ref).appendTo(".cs-grid");
+                $(concept.ref).offset({"left": snapped.x, "top": snapped.y});
+                self = getBoundingBox(concept.ref);
+            }
+            concept.x = (self.x - origin.x + self.width/2) / origin.width;
+            concept.y = (self.y - origin.y + self.height/2) / origin.height;
+            $("#concept-padding-"+concept.id).remove();
+            if (concept.state == "available") {
+                moveConcept(concept.id, available_concepts, completed_concepts);
+                completed_concept = $("<li concept-id='"+concept.id+"'><span class='badge'>"+concept.name+"</span><span>"+concept.comment+"</span></li>");
                 completed_concept.click(function() {
-                    dropConcept(id);
-                    openConceptEditor(name, id);
+                    showConcept(id);
+                    openConceptEditor(concept);
+                });
+                $(concept.ref).click(function() {
+                    openConceptEditor(concept);
                 });
                 $("#completed-concepts").append(completed_concept);
+                concept.state = "completed";
             }
-            available_concepts[name].dropped = true;
-            dropConcept(id);
-            layoutCurrentConcepts();            
+            red = Math.floor(concept.x * 200);
+            blue = Math.floor(concept.y * 200);
+            $("#completed-concepts li[concept-id="+concept.id+"] span").first().css({"background-color" : "rgb("+red+","+blue+",128)"});
+            showConcept(id);
+            layoutAvailableConcepts();            
+            fillAvailableConcepts();
         }});
-    concept.click(function() {
-        openConceptEditor(name, id);
-    });
-    concept.css({"position": "absolute"});
-    $("#concepts").append(concept);
-    layoutCurrentConcepts();
+    $(concept.ref).css({"position": "absolute"});
+    layoutAvailableConcepts();
 }
 
 $(document).ready(function() {
     window.onresize = resizeCSGrid;
     resizeCSGrid();
     buildConceptDialog();
-    createNewDraggableConcept("Closures", 1, "My comment");
-    createNewDraggableConcept("Copy Constructors", 2, "");
-    createNewDraggableConcept("Pointers", 100, "A longer comment");
-    createNewDraggableConcept("Reading from a file", 77, "This is a much much longer comment. It should be just enough. This is a much much longer comment. It should be just enough.");
-    createNewDraggableConcept("Local variables vs. global variables", 870, "");
+    fillAvailableConcepts();
 });
