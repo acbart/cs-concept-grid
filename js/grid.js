@@ -14,12 +14,14 @@ A concept has:
     state: string (either "unseen", "available", "completed")
 **/
 
-MAX_VISIBLE_CONCEPTS = 7;
+MAX_VISIBLE_CONCEPTS = 15;
 MAX_AVAILABLE_CONCEPTS = 5;
+CONCEPTS_PER_RANK = 10;
 user = "acbart";
 available_concepts = [];
 visible_concepts = [];
 completed_concepts = [];
+RANKS = ["Undergraduate Student", "Masters Student", "PhD Student", "Post-doc", "Assistant Professor", "Associate Professor", "Full Professor", "Dean", "Provost", "President"];
 unseen_concepts = [
     {id : 0, name: "Closures", comment: ""},
     {id : 1, name: "Pointers", comment: ""},
@@ -44,6 +46,17 @@ unseen_concepts = [
 $.each(unseen_concepts, function(index, concept) {
     concept.state = "unseen";
 });
+
+function updateProgressBar() {
+    rank = Math.floor(completed_concepts.length / CONCEPTS_PER_RANK);
+    if (rank < RANKS.length) {
+        $("#rank").text(RANKS[rank]);
+    } else {
+        $("#rank").text(RANKS[RANKS.length]);
+    }
+    progress = Math.floor(100 * (completed_concepts.length / CONCEPTS_PER_RANK) % 100);
+    $("#rank-progress").css({"width":  progress + "%"}).text(progress+"% Complete");
+}
 
 function lookupConcept(list, id) {
     for (i = 0; i < list.length; i += 1) {
@@ -110,6 +123,7 @@ function unsetConcept(id) {
     // Update view
     $("#concept-" + id).remove();
     fillAvailableConcepts();
+    updateProgressBar();
 }
 
 // Convert the internal coordinates on the grid to the ones used by the browser
@@ -318,6 +332,7 @@ function makeConceptAvailable(concept) {
             showConcept(concept.id);
             layoutAvailableConcepts();            
             fillAvailableConcepts();
+            updateProgressBar();
         }});
     $(concept.ref).css({"position": "absolute"});
     layoutAvailableConcepts();
@@ -328,4 +343,5 @@ $(document).ready(function() {
     resizeCSGrid();
     buildConceptDialog();
     fillAvailableConcepts();
+    updateProgressBar();
 });
