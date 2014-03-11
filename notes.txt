@@ -1,8 +1,5 @@
 Basic requirements:
-    * Draw axis
     * Showing the current word
-    * Clicking on the grid puts the circle with that word, add optional comment
-    * Can drag circles, click to edit
     * be able to skip a word
     * Tie in with facebook or gmail id
     * Show heatmap of average answers

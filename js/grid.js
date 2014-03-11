@@ -1,5 +1,7 @@
-concepts = {}
-concept_ids = {}
+concepts = {};
+concept_ids = {};
+visible_concepts = [];
+MAX_VISIBLE = 10;
 
 function getNewConcepts(user) {
 }
@@ -101,6 +103,17 @@ function openConceptEditor(name, id) {
     }
 }
 
+function dropConcept(id) {
+    if (-1 == $.inArray(id, visible_concepts)) {
+        $("#concept-"+id).show();
+        visible_concepts.push(id);
+        while (visible_concepts.length > MAX_VISIBLE) {
+            hiding_element = visible_concepts.shift();
+            $("#concept-"+hiding_element).hide();
+        }
+    }
+}
+
 function createNewDraggableConcept(name, id, comment) {
     concept_ids[id] = name;
     concepts[name] = {"ref": "#concept-"+id,
@@ -161,21 +174,18 @@ function createNewDraggableConcept(name, id, comment) {
             } else {
                 completed_concept = $("<li concept-id='"+id+"'><span class='badge' style='background-color:rgb("+red+","+blue+",128)'>"+name+"</span><span>"+comment+"</span></li>");
                 completed_concept.click(function() {
+                    dropConcept(id);
                     openConceptEditor(name, id);
                 });
                 $("#completed-concepts").append(completed_concept);
             }
             concepts[name].dropped = true;
-            layoutCurrentConcepts();
+            dropConcept(id);
+            layoutCurrentConcepts();            
         }});
     concept.click(function() {
         openConceptEditor(name, id);
     });
-    function sleep(ms) {
-      var start = new Date().getTime(), expire = start + ms;
-      while (new Date().getTime() < expire) { }
-      return;
-    }
     concept.css({"position": "absolute"});
     $("#concepts").append(concept);
     layoutCurrentConcepts();
