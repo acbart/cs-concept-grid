@@ -11,10 +11,12 @@ Basic requirements:
         
 Tables:
     Concepts
+        id
         word
         description
     Users
         id
+        profession
         description
     Pins
         concept
