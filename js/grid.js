@@ -315,7 +315,7 @@ function makeConceptAvailable(concept) {
             $("#concept-padding-"+concept.id).remove();
             if (concept.state == "available") {
                 moveConcept(concept.id, available_concepts, completed_concepts);
-                completed_concept = $("<li concept-id='"+concept.id+"'><span class='badge'>"+concept.name+"</span><span>"+concept.comment+"</span></li>");
+                completed_concept = $("<li concept-id='"+concept.id+"'><span class='completed-concept badge'>"+concept.name+"</span><span>"+concept.comment+"</span></li>");
                 completed_concept.click(function() {
                     showConcept(concept.id);
                     openConceptEditor(concept);

@@ -28,10 +28,18 @@
     white-space:nowrap;
 }
 
+.concept:hover {
+    background-color: lightgray;
+}
+
 .concept-padding {
     border: 1px solid black;
     border-radius:4px;
     padding: 4px;
+}
+
+.completed-concept:hover {
+    color: black;
 }
 
 .vertical-axis {
